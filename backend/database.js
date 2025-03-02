@@ -1,30 +1,19 @@
-const { Connection, Request } = require("tedious");
+const { Pool } = require("pg");
 
-// Configuração do banco de dados no Azure
-const config = {
-    server: "srv-gs.database.windows.net",
-    authentication: {
-        type: "default",
-        options: {
-            userName: "admin_gs", // Altere para seu usuário do SQL Server
-            password: "Userpass@30" // Altere para sua senha
-        }
-    },
-    options: {
-        encrypt: true, // Necessário para conexão segura
-        database: "DW"
-    }
-};
-
-// Criar a conexão
-const connection = new Connection(config);
-
-connection.on("connect", err => {
-    if (err) {
-        console.error("Erro ao conectar ao SQL Server:", err);
-    } else {
-        console.log("Conectado ao SQL Server no Azure!");
+// Configuração do banco de dados PostgreSQL
+const pool = new Pool({
+    user: "neondb_owner",
+    host: "ep-little-mouse-a8z1m83y-pooler.eastus2.azure.neon.tech",
+    database: "neondb",
+    password: "npg_DaWpjMJ08HbR",
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false
     }
 });
 
-module.exports = connection;
+pool.connect()
+    .then(() => console.log("Conectado ao PostgreSQL no Azure!"))
+    .catch(err => console.error("Erro ao conectar ao PostgreSQL:", err));
+
+module.exports = pool;
