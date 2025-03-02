@@ -1,73 +1,71 @@
 const express = require("express");
 const sql = require("mssql");
-const cors = require("cors");
-const app = express();
 
-app.use(cors());
-app.use(express.json()); // Permite receber JSON corretamente
-app.use(express.urlencoded({ extended: true })); // Permite receber dados de formulário
+const router = express.Router();
 
+// Configuração da conexão com o SQL Server Azure
 const config = {
     user: "admin_gs",
     password: "Userpass@30",
     server: "srv-gs.database.windows.net",
     database: "dw",
-    options: { encrypt: true, enableArithAbort: true }
+    options: {
+        encrypt: true,
+        enableArithAbort: true
+    }
 };
 
-app.post("/cadastrar-cliente", async (req, res) => {
+// Função para conectar ao banco de dados
+async function connectToDatabase() {
     try {
-        console.log("?? Recebendo dados do formulário...");
-        console.log("?? Dados Recebidos:", JSON.stringify(req.body, null, 2));
+        return await sql.connect(config);
+    } catch (error) {
+        console.error("? Erro ao conectar ao banco:", error);
+        throw new Error("Erro ao conectar ao banco de dados.");
+    }
+}
 
-        await sql.connect(config);
+// ?? **Rota para cadastrar cliente**
+router.post("/cadastrar-cliente", async (req, res) => {
+    let connection;
+    try {
+        connection = await connectToDatabase();
 
-        const {
-            Nome, DD, Telefone, RG, CPF, DataNascimento, NomeMae, 
-            CEP, Endereco, Numero, Complemento, Bairro, Cidade, Estado, 
-            MarcaModelo, Placa, Ano, Cor
-        } = req.body;
+        const { nome, cpf, telefone } = req.body;
 
-        if (!Nome || !CPF || !Telefone) {
-            throw new Error("? Nome, CPF e Telefone são obrigatórios.");
+        // Validação dos campos obrigatórios
+        if (!nome || !cpf || !telefone) {
+            return res.status(400).json({ success: false, message: "Nome, CPF e Telefone são obrigatórios!" });
         }
 
-        // Inserir Cliente
-        const resultCliente = await sql.query`
-            INSERT INTO Cliente (Nome, DD, Telefone, RG, CPF, DataNascimento, NomeMae) 
-            OUTPUT INSERTED.IdCliente
-            VALUES (${Nome}, ${DD}, ${Telefone}, ${RG}, ${CPF}, ${DataNascimento}, ${NomeMae})
-        `;
+        // Verifica se o CPF já existe no banco
+        const checkCPF = await connection.request()
+            .input("cpf", sql.VarChar, cpf)
+            .query("SELECT COUNT(*) AS count FROM Clientes WHERE CPF = @cpf");
 
-        if (resultCliente.recordset.length === 0) {
-            throw new Error("? Falha ao inserir Cliente.");
+        if (checkCPF.recordset[0].count > 0) {
+            return res.status(400).json({ success: false, message: "CPF já cadastrado no sistema!" });
         }
 
-        const IdCliente = resultCliente.recordset[0].IdCliente;
-        console.log("? Cliente inserido com ID:", IdCliente);
-
-        // Inserir Endereço
-        await sql.query`
-            INSERT INTO EnderecoCliente (IdCliente, CEP, Endereco, Numero, Complemento, Bairro, Cidade, Estado) 
-            VALUES (${IdCliente}, ${CEP}, ${Endereco}, ${Numero}, ${Complemento}, ${Bairro}, ${Cidade}, ${Estado})
-        `;
-
-        console.log("? Endereço cadastrado!");
-
-        // Inserir Veículo
-        await sql.query`
-            INSERT INTO VeiculoCliente (IdCliente, MarcaModelo, Placa, Ano, Cor) 
-            VALUES (${IdCliente}, ${MarcaModelo}, ${Placa}, ${Ano}, ${Cor})
-        `;
-
-        console.log("? Veículo cadastrado!");
+        // Insere o novo cliente de forma segura
+        await connection.request()
+            .input("nome", sql.VarChar, nome)
+            .input("cpf", sql.VarChar, cpf)
+            .input("telefone", sql.VarChar, telefone)
+            .query(`
+                INSERT INTO Clientes (Nome, CPF, Telefone)
+                VALUES (@nome, @cpf, @telefone)
+            `);
 
         res.json({ success: true, message: "Cliente cadastrado com sucesso!" });
-    } catch (err) {
-        console.error("? Erro ao cadastrar cliente:", err.message);
-        res.status(500).json({ success: false, message: err.message });
+
+    } catch (error) {
+        console.error("? Erro ao cadastrar cliente:", error);
+        res.status(500).json({ success: false, message: "Erro ao cadastrar cliente!" });
+    } finally {
+        if (connection) connection.close(); // Fecha a conexão ao final
     }
 });
 
-// Iniciar o servidor
-app.listen(3000, () => console.log("?? Servidor rodando na porta 3000"));
+// Exportando as rotas
+module.exports = router;
