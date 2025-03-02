@@ -28,7 +28,7 @@ async function cadastrarCliente() {
     }
 
     try {
-        const response = await fetch("http://localhost:3000/cadastrar-cliente", {
+        const response = await fetch("https://cashnow-app.onrender.com/cadastrar-cliente", {
             method: "POST",
             body: formData
         });
