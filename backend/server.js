@@ -6,7 +6,12 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-app.use(cors());
+// ✅ Habilita CORS para o frontend
+app.use(cors({
+    origin: "https://cashnow-app.vercel.app", // Permite requisições do frontend
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization"
+}));
 
 // Configuração do banco de dados PostgreSQL
 const pool = new Pool({
