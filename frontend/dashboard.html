@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CashNow</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="dashboard-box">
+        <img src="images/Logo.png" alt="CashNow" class="logo">
+        <h2>Bem-vindo ao Painel</h2>
+        <p>Escolha uma opção abaixo:</p>
+        
+        <div class="button-group">
+            <button onclick="location.href='cadastrar-cliente.html'"><i class="fas fa-user-plus"></i> Cadastrar Novo Cliente</button>
+            <button onclick="location.href='novo-emprestimo.html'"><i class="fas fa-hand-holding-usd"></i> Novo Empréstimo</button>
+            <button onclick="location.href='acompanhamento-emprestimos.html'"><i class="fas fa-chart-line"></i> Acompanhamento de Empréstimos</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #007bff, #00cc66);
+        margin: 0;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 450px;
+        padding: 20px;
+    }
+
+    .dashboard-box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    .logo {
+        width: 120px;
+        display: block;
+        margin: 0 auto 20px auto;
+    }
+
+    h2 {
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    button i {
+        font-size: 18px;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    /* Responsividade */
+    @media (max-width: 480px) {
+        .dashboard-box {
+            padding: 20px;
+        }
+
+        button {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+</style>
+
+</body>
+</html>

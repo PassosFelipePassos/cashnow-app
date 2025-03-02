@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CashNow</title>
+    <link rel="stylesheet" href="styleLogin.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="login-box">
+        <img src="images/Logo.png" alt="CashNow" class="logo">
+        <h2>Bem-vindo</h2>
+        <p>Faça login para acessar sua conta</p>
+        <input type="number" id="idColaborador" placeholder="ID do Colaborador">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p id="mensagem"></p>
+    </div>
+</div>
+
+<script>
+    async function login() {
+        const idColaborador = document.getElementById("idColaborador").value;
+        const password = document.getElementById("password").value;
+
+        if (idColaborador === "" || password === "") {
+            document.getElementById("mensagem").innerText = "Preencha todos os campos!";
+            document.getElementById("mensagem").style.color = "red";
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idColaborador, password })
+            });
+
+            const data = await response.json();
+            console.log("Resposta do servidor:", data);
+
+            if (data.success) {
+                alert("Login bem-sucedido!");
+                window.location.href = "dashboard.html"; // Redireciona para o Dashboard
+            } else {
+                document.getElementById("mensagem").innerText = "ID ou senha incorretos!";
+                document.getElementById("mensagem").style.color = "red";
+            }
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            document.getElementById("mensagem").innerText = "Erro ao conectar ao servidor!";
+            document.getElementById("mensagem").style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>

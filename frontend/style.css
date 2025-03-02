@@ -1,0 +1,198 @@
+/* Importando a fonte Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #007bff, #00cc66);
+}
+
+/* Cabeçalho com Logo e Ícone do Menu */
+.header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+}
+
+.header-logo {
+    width: 90px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    max-height: 50px;
+}
+
+/* Ícone do Menu com Imagem */
+.menu-icon {
+    width: 35px;
+    height: 35px;
+    background: url('images/IconeMenu.png') no-repeat center center;
+    background-size: contain;
+    cursor: pointer;
+    border: none;
+}
+
+/* Menu Lateral */
+.menu {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    padding-top: 60px;
+}
+
+.menu.active {
+    left: 0;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.menu ul li {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 18px;
+    display: block;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.menu ul li a:hover {
+    background: #007bff;
+    color: white;
+    padding-left: 10px;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    margin-top: 80px;
+}
+
+.form-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 100%;
+}
+
+h2 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: #333;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 15px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.form-section {
+    display: none;
+}
+
+.form-section.active {
+    display: block;
+}
+
+p#mensagem {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+@media (max-width: 480px) {
+    .header {
+        height: 50px;
+        padding: 5px 10px;
+    }
+    .header-logo {
+        width: 80px;
+        max-height: 45px;
+    }
+    .menu-icon {
+        width: 30px;
+        height: 30px;
+    }
+    .container {
+        max-width: 90%;
+    }
+    .form-box {
+        padding: 15px;
+    }
+    input, button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
