@@ -76,7 +76,7 @@ app.get("/listar-clientes", async (req, res) => {
         res.status(500).json({ success: false, message: "Erro ao buscar clientes!" });
     }
 });
-
+/*
 app.post("/cadastrar-pagamento", async (req, res) => {
     const { idcliente, data_pagamento, valor } = req.body;
 
@@ -95,6 +95,52 @@ app.post("/cadastrar-pagamento", async (req, res) => {
         res.status(500).json({ success: false, message: "Erro ao cadastrar pagamento!" });
     }
 });
+*/
+
+// ✅ Rota para cadastrar um novo empréstimo
+app.post("/cadastrar-emprestimo", async (req, res) => {
+    const { idcliente, valor, quantidade_parcela, data_inicio_pagamento } = req.body;
+
+    if (!idcliente || !valor || !quantidade_parcela || !data_inicio_pagamento) {
+        return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
+    }
+
+    try {
+        // 💰 1️⃣ Inserir o empréstimo na tabela `emprestimo`
+        const result = await pool.query(
+            `INSERT INTO emprestimo (idcliente, valor, quantidade_parcela, data_inicio_pagamento)
+             VALUES ($1, $2, $3, $4) RETURNING idemprestimo`,
+            [idcliente, valor, quantidade_parcela, data_inicio_pagamento]
+        );
+
+        const idemprestimo = result.rows[0].idemprestimo;
+        console.log("✅ Empréstimo cadastrado! ID:", idemprestimo);
+
+        // 💰 2️⃣ Criar as parcelas na tabela `pagamento`
+        const valorParcela = (valor / quantidade_parcela).toFixed(2);
+        let dataParcela = new Date(data_inicio_pagamento);
+
+        for (let i = 0; i < quantidade_parcela; i++) {
+            await pool.query(
+                `INSERT INTO pagamento (idemprestimo, idcliente, data, valor, status)
+                 VALUES ($1, $2, $3, $4, 'Aberto')`,
+                [idemprestimo, idcliente, dataParcela.toISOString().split("T")[0], valorParcela]
+            );
+
+            console.log(`💲 Parcela ${i + 1} cadastrada para ${dataParcela.toISOString().split("T")[0]}`);
+            
+            // Avança um mês para a próxima parcela
+            dataParcela.setMonth(dataParcela.getMonth() + 1);
+        }
+
+        return res.json({ success: true, message: "Empréstimo cadastrado com sucesso!" });
+
+    } catch (error) {
+        console.error("❌ Erro ao cadastrar empréstimo:", error);
+        return res.status(500).json({ success: false, message: "Erro ao cadastrar empréstimo!" });
+    }
+});
+
 
 
 
