@@ -13,7 +13,7 @@ const pool = new Pool({
     user: "neondb_owner",
     host: "ep-little-mouse-a8z1m83y-pooler.eastus2.azure.neon.tech",
     database: "neondb",
-    password: "npg_DaWpjMJ08HbR",
+    password: "npg_DazcszcWpjMJzczscz08HbR",
     port: 5432,
     ssl: {
         rejectUnauthorized: false
@@ -21,25 +21,37 @@ const pool = new Pool({
 });
 
 // Função para buscar senha do usuário no banco
+// Função para buscar senha do usuário no banco
 async function getUserPassword(id) {
     try {
         console.log(`🔍 Buscando usuário com ID: ${id}`);
+        
         const result = await pool.query(
             "SELECT senha_hash FROM usuarios WHERE id = $1", 
             [id]
         );
 
+        console.log("🔎 Resultado da consulta:", result.rows); // Log para depuração
+
         if (result.rows.length === 0) {
-            console.log("❌ Usuário não encontrado.");
+            console.log("❌ Nenhum usuário encontrado com esse ID.");
             return null;
         }
 
-        return result.rows[0].senha.trim();
+        const senha = result.rows[0].senha_hash;
+
+        if (!senha) {
+            console.log("❌ Senha não definida para este usuário.");
+            return null;
+        }
+
+        return senha.trim();
     } catch (err) {
         console.error("❌ Erro ao buscar usuário:", err);
         return null;
     }
 }
+
 
 // ✅ Rota de login
 app.post("/login", async (req, res) => {
