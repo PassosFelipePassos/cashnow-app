@@ -45,6 +45,7 @@ async function cadastrarCliente() {
         if (data.success) {
             alert("Cliente cadastrado com sucesso!");
             document.getElementById("clienteForm").reset();
+			document.getElementById("section1").style.display = "block";
         } else {
             alert("Erro ao cadastrar cliente: " + data.message);
         }
