@@ -14,7 +14,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
         }
 
         // Verifica se o CPF já existe no banco
-        const checkCPF = await pool.query("SELECT COUNT(*) FROM clientes WHERE cpf = $1", [cpf]);
+        const checkCPF = await pool.query("SELECT COUNT(*) FROM cliente WHERE cpf = $1", [cpf]);
         
         if (parseInt(checkCPF.rows[0].count) > 0) {
             return res.status(400).json({ success: false, message: "CPF já cadastrado no sistema!" });
@@ -22,7 +22,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
 
         // Insere o novo cliente de forma segura
         await pool.query(
-            "INSERT INTO clientes (nome, cpf, telefone) VALUES ($1, $2, $3)",
+            "INSERT INTO cliente (nome, cpf, telefone) VALUES ($1, $2, $3)",
             [nome, cpf, telefone]
         );
 
