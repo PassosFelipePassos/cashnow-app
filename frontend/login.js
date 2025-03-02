@@ -1,8 +1,8 @@
 async function login() {
-    const idColaborador = document.getElementById("idColaborador").value;
+    const id = document.getElementById("id").value;
     const password = document.getElementById("password").value;
 
-    if (idColaborador === "" || password === "") {
+    if (id === "" || password === "") {
         document.getElementById("mensagem").innerText = "Preencha todos os campos!";
         document.getElementById("mensagem").style.color = "red";
         return;
@@ -14,7 +14,7 @@ async function login() {
         const response = await fetch("https://cashnow-app.onrender.com/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idColaborador, password })
+            body: JSON.stringify({ id, password })
         });
 
         console.log("📥 Resposta recebida:", response); // Debug
