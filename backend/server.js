@@ -122,23 +122,26 @@ app.post("/cadastrar-emprestimo", async (req, res) => {
     }
 });
 
-app.get("/listar-pagamentos", async (req, res) => {
+app.get("/listar-pagamentos/:idcliente", async (req, res) => {
+    const { idcliente } = req.params;
+
     try {
         const query = `
-            SELECT p.idpagamento, p.idemprestimo, p.data_pagamento, p.valor, p.status, c.nome AS nome_cliente
+            SELECT p.idpagamento, p.data_pagamento, p.valor, p.status
             FROM pagamento p
-            JOIN emprestimo e ON p.idemprestimo = e.idemprestimo
-            JOIN cliente c ON e.idcliente = c.idcliente
-            ORDER BY c.nome, p.data_pagamento;
+            WHERE p.idcliente = $1
+            ORDER BY p.data_pagamento;
         `;
 
-        const result = await pool.query(query);
+        const result = await pool.query(query, [idcliente]);
+
         res.json(result.rows);
     } catch (error) {
         console.error("Erro ao listar pagamentos:", error);
         res.status(500).json({ success: false, message: "Erro ao buscar pagamentos." });
     }
 });
+
 
 // ✅ Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
