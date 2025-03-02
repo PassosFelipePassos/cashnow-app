@@ -3,11 +3,13 @@ async function login() {
     const password = document.getElementById("password").value;
 
     const response = await fetch("https://cashnow-app.onrender.com/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idColaborador, password })
-    });
-
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+        idColaborador: document.getElementById("idColaborador").value, 
+        password: document.getElementById("password").value 
+    })
+});
     const data = await response.json();
     
     if (data.success) {
