@@ -1,6 +1,7 @@
 /* Importando a fonte Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
+/* Reset global */
 * {
     margin: 0;
     padding: 0;
@@ -8,12 +9,16 @@
     font-family: 'Poppins', sans-serif;
 }
 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Bloquear rolagem no corpo e impedir zoom no celular */
+html, body {
+    overflow: hidden; /* Bloqueia rolagem na tela */
     height: 100vh;
+    width: 100vw;
+    touch-action: manipulation; /* Evita zoom acidental */
     background: linear-gradient(135deg, #007bff, #00cc66);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Container principal da tela de login */
@@ -30,6 +35,9 @@ body {
     border-radius: 12px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
+    max-height: 80vh; /* Define altura máxima */
+    overflow-y: auto; /* Permite rolagem interna se necessário */
+    -webkit-overflow-scrolling: touch; /* Melhor rolagem no iOS */
 }
 
 /* Logo da tela de login */
@@ -78,18 +86,20 @@ button:hover {
     background: #0056b3;
 }
 
-/* Ajustes para a página de login apenas */
+/* Ajustes específicos para a página de login */
 .login-page body {
     justify-content: center;
     align-items: center;
 }
 
+/* Ajustes para telas menores */
 @media (max-width: 480px) {
     .container {
         max-width: 90%;
     }
     .login-box {
         padding: 20px;
+        max-height: 85vh; /* Ajuste para melhor visualização em mobile */
     }
     input, button {
         font-size: 14px;

@@ -1,6 +1,7 @@
 /* Importando a fonte Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
+/* Reset de margens e fonte padrão */
 * {
     margin: 0;
     padding: 0;
@@ -8,16 +9,19 @@
     font-family: 'Poppins', sans-serif;
 }
 
-body {
+/* Bloquear rolagem no corpo da página */
+html, body {
+    overflow: hidden; /* Impede rolagem na tela inteira */
+    height: 100vh;
+    width: 100vw;
+    touch-action: manipulation; /* Impede zoom acidental */
+    background: linear-gradient(135deg, #007bff, #00cc66);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #007bff, #00cc66);
 }
 
-/* Cabeçalho com Logo e Ícone do Menu */
+/* Cabeçalho fixo */
 .header {
     width: 100%;
     display: flex;
@@ -34,6 +38,7 @@ body {
     height: 60px;
 }
 
+/* Logo no cabeçalho */
 .header-logo {
     width: 90px;
     height: auto;
@@ -42,11 +47,11 @@ body {
     max-height: 50px;
 }
 
-/* Ícone do Menu com Imagem */
+/* Ícone do Menu Lateral */
 .menu-icon {
     width: 35px;
     height: 35px;
-    background: url('images/IconeMenu.png') no-repeat center center;
+    /*background: url('images/IconeMenu.png') no-repeat center center;*/
     background-size: contain;
     cursor: pointer;
     border: none;
@@ -95,6 +100,7 @@ body {
     padding-left: 10px;
 }
 
+/* Container Centralizado */
 .container {
     width: 100%;
     max-width: 500px;
@@ -102,17 +108,20 @@ body {
     margin-top: 80px;
 }
 
+/* Caixa do Formulário */
 .form-box {
     background: white;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-height: 80vh; /* Definir altura máxima */
+    overflow-y: auto; /* Permitir rolagem dentro do formulário */
+    -webkit-overflow-scrolling: touch; /* Melhor rolagem no iOS */
     width: 100%;
 }
 
+/* Títulos */
 h2 {
     color: #007bff;
     margin-bottom: 10px;
@@ -124,6 +133,7 @@ h3 {
     text-align: left;
 }
 
+/* Labels */
 label {
     display: block;
     text-align: left;
@@ -132,6 +142,7 @@ label {
     color: #333;
 }
 
+/* Inputs */
 input {
     width: 100%;
     padding: 10px;
@@ -141,6 +152,7 @@ input {
     font-size: 16px;
 }
 
+/* Botões */
 button {
     width: 100%;
     padding: 12px;
@@ -159,6 +171,7 @@ button:hover {
     background: #0056b3;
 }
 
+/* Controle das seções do formulário */
 .form-section {
     display: none;
 }
@@ -167,30 +180,45 @@ button:hover {
     display: block;
 }
 
+/* Mensagem de erro ou sucesso */
 p#mensagem {
     margin-top: 15px;
     font-weight: bold;
 }
 
+/* Ajustes para celulares */
 @media (max-width: 480px) {
+    /* Ajuste do cabeçalho */
     .header {
         height: 50px;
         padding: 5px 10px;
     }
+
     .header-logo {
         width: 80px;
         max-height: 45px;
     }
+
     .menu-icon {
         width: 30px;
         height: 30px;
     }
+
+    /* Ajustes no container */
     .container {
-        max-width: 90%;
+        max-width: 95%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
+
+    /* Ajustes na rolagem do formulário */
     .form-box {
-        padding: 15px;
+        max-height: 85vh;
     }
+
+    /* Ajustes nos inputs e botões */
     input, button {
         font-size: 14px;
         padding: 10px;
