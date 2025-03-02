@@ -63,27 +63,7 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.post("/cadastrar-cliente", async (req, res) => {
-    try {
-        await sql.connect(config);
-        const { nome, cpf, telefone } = req.body;
 
-        if (!nome || !cpf || !telefone) {
-            return res.status(400).json({ success: false, message: "Nome, CPF e Telefone são obrigatórios!" });
-        }
-
-        const query = `
-            INSERT INTO Clientes (Nome, CPF, Telefone)
-            VALUES ('${nome}', '${cpf}', '${telefone}')
-        `;
-        await sql.query(query);
-
-        res.json({ success: true, message: "Cliente cadastrado com sucesso!" });
-    } catch (error) {
-        console.error("❌ Erro ao cadastrar cliente:", error);
-        res.status(500).json({ success: false, message: "Erro ao cadastrar cliente!" });
-    }
-});
 
 // ✅ **Certifique-se de que o servidor está escutando corretamente**
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
