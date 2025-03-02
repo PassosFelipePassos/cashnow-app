@@ -19,14 +19,14 @@ async function cadastrarCliente() {
         },
 
         veiculo: {
-            marcaModelo: document.getElementById("marcaModelo").value.trim(),
-            placa: document.getElementById("placa").value.trim(),
-            ano: document.getElementById("ano").value.trim(),
-            cor: document.getElementById("cor").value.trim()
+            marcaModelo: document.getElementById("marcaModelo")?.value.trim() || "",
+            placa: document.getElementById("placa")?.value.trim() || "",
+            ano: document.getElementById("ano")?.value.trim() || "",
+            cor: document.getElementById("cor")?.value.trim() || ""
         }
     };
 
-    console.log("?? Enviando dados para o servidor:", JSON.stringify(clienteData, null, 2));
+    console.log("📤 Enviando dados para o servidor:", JSON.stringify(clienteData, null, 2));
 
     try {
         const response = await fetch("https://cashnow-app.onrender.com/cadastrar-cliente", {
@@ -38,7 +38,7 @@ async function cadastrarCliente() {
         });
 
         const text = await response.text(); // Captura a resposta antes de converter para JSON
-        console.log("?? Resposta bruta do servidor:", text);
+        console.log("📥 Resposta bruta do servidor:", text);
 
         const data = JSON.parse(text); // Converte para JSON
 
@@ -49,7 +49,7 @@ async function cadastrarCliente() {
             alert("Erro ao cadastrar cliente: " + data.message);
         }
     } catch (error) {
-        console.error("? Erro ao cadastrar cliente:", error);
+        console.error("❌ Erro ao cadastrar cliente:", error);
         alert("Erro ao conectar com o servidor!");
     }
 }
