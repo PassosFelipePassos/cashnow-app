@@ -226,11 +226,10 @@ p#mensagem {
 }
 
 
-
 /* Ajustes na tabela */
 .table-container {
     width: 100%;
-    overflow-x: auto; /* Para rolagem horizontal caso precise */
+    overflow-x: auto;
     margin-top: 20px;
 }
 
@@ -255,7 +254,7 @@ th {
     font-weight: bold;
 }
 
-/* Ajusta a largura da primeira coluna (Cliente) */
+/* Ajusta a largura da primeira coluna */
 th:first-child, td:first-child {
     text-align: left;
     font-weight: bold;
@@ -281,24 +280,7 @@ th:first-child, td:first-child {
     cursor: pointer;
 }
 
-/* Estiliza hover nos dias que podem ser pagos */
-.aberto:hover, .vencido:hover {
-    opacity: 0.8;
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-    th, td {
-        font-size: 12px;
-        padding: 8px;
-    }
-
-    th:first-child, td:first-child {
-        min-width: 120px;
-    }
-}
-
-/* Modal para confirmação */
+/* Modal de confirmação */
 .modal {
     display: none;
     position: fixed;
@@ -337,6 +319,7 @@ th:first-child, td:first-child {
     background: red;
     color: white;
 }
+
 
 
 
