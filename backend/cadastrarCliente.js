@@ -7,19 +7,30 @@ const router = express.Router();
 router.post("/cadastrar-cliente", async (req, res) => {
     console.log("?? Dados recebidos no backend:", JSON.stringify(req.body, null, 2));
 
-    const client = await pool.connect(); // Conexão com o banco
+    // Converte todas as chaves para minúsculas automaticamente
+    const normalizeKeys = obj => {
+        if (typeof obj !== 'object' || obj === null) return obj;
+        return Object.keys(obj).reduce((acc, key) => {
+            acc[key.toLowerCase()] = normalizeKeys(obj[key]);
+            return acc;
+        }, {});
+    };
+
+    const normalizedBody = normalizeKeys(req.body);
+    
+    const {
+        nome, dd, telefone, rg, cpf, datanascimento, nomemae,
+        endereco, veiculo
+    } = normalizedBody;
+
+    if (!nome || !cpf || !telefone || !endereco || !veiculo) {
+        console.log("? Campos ausentes:", { nome, cpf, telefone, endereco, veiculo });
+        return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
+    }
+
+    const client = await pool.connect();
 
     try {
-        const {
-            nome, dd, telefone, rg, cpf, dataNascimento, nomeMae,
-            endereco, veiculo
-        } = req.body;
-
-        if (!nome || !cpf || !telefone || !endereco || !veiculo) {
-            console.log("? Campos ausentes:", { nome, cpf, telefone, endereco, veiculo });
-            return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
-        }
-
         await client.query("BEGIN"); // Inicia transação
 
         // Verifica se o CPF já existe no banco
@@ -33,23 +44,23 @@ router.post("/cadastrar-cliente", async (req, res) => {
         const resultCliente = await client.query(
             `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, data_nascimento, nome_mae)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [nome, dd, telefone, rg, cpf, dataNascimento, nomeMae]
+            [nome, dd, telefone, rg, cpf, datanascimento, nomemae]
         );
 
         const clienteId = resultCliente.rows[0].id;
 
         // Insere o endereço
         await client.query(
-            `INSERT INTO public.enderecocliente (cliente_id, cep, endereco, numero, complemento, bairro, cidade, estado)
+            `INSERT INTO public.enderecocliente (cliente_id, cep, logradouro, numero, complemento, bairro, cidade, estado)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [clienteId, endereco.cep, endereco.endereco, endereco.numero, endereco.complemento, endereco.bairro, endereco.cidade, endereco.estado]
+            [clienteId, endereco.cep, endereco.logradouro, endereco.numero, endereco.complemento, endereco.bairro, endereco.cidade, endereco.estado]
         );
 
         // Insere o veículo
         await client.query(
             `INSERT INTO public.veiculocliente (cliente_id, marca_modelo, placa, ano, cor)
              VALUES ($1, $2, $3, $4, $5)`,
-            [clienteId, veiculo.marcaModelo, veiculo.placa, veiculo.ano, veiculo.cor]
+            [clienteId, veiculo.marcamodelo, veiculo.placa, veiculo.ano, veiculo.cor]
         );
 
         await client.query("COMMIT");
