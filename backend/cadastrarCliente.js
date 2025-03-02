@@ -37,7 +37,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
 
         // Insere o novo cliente
         const resultCliente = await client.query(
-            `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, datanascimento, nome_mae)
+            `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, datanascimento, nomemae)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
             [nome, dd, telefone, rg, cpf, dataNascimento, nomeMae]
         );
@@ -46,14 +46,14 @@ router.post("/cadastrar-cliente", async (req, res) => {
 
         // Insere o endereço
         await client.query(
-            `INSERT INTO public.enderecocliente (cliente_id, cep, logradouro, numero, complemento, bairro, cidade, estado)
+            `INSERT INTO public.enderecocliente (idcliente, cep, endereco, numero, complemento, bairro, cidade, estado)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
             [clienteId, endereco.cep, endereco.logradouro, endereco.numero, endereco.complemento, endereco.bairro, endereco.cidade, endereco.estado]
         );
 
         // Insere o veículo
         await client.query(
-            `INSERT INTO public.veiculocliente (cliente_id, marca_modelo, placa, ano, cor)
+            `INSERT INTO public.veiculocliente (idcliente, marcamodelo, placa, ano, cor)
              VALUES ($1, $2, $3, $4, $5)`,
             [clienteId, veiculo.marcaModelo, veiculo.placa, veiculo.ano, veiculo.cor]
         );
