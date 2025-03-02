@@ -135,12 +135,15 @@ app.get("/listar-pagamentos/:idcliente", async (req, res) => {
 
         const result = await pool.query(query, [idcliente]);
 
+        console.log("🔍 Pagamentos encontrados:", result.rows); // Adiciona LOG
+
         res.json(result.rows);
     } catch (error) {
-        console.error("Erro ao listar pagamentos:", error);
+        console.error("❌ Erro ao listar pagamentos:", error);
         res.status(500).json({ success: false, message: "Erro ao buscar pagamentos." });
     }
 });
+
 
 
 // ✅ Iniciar o servidor
