@@ -48,8 +48,9 @@ async function getUserPassword(idColaborador) {
 app.post("/login", async (req, res) => {
     const { idColaborador, password } = req.body;
 
-    const passwordTrimmed = password.trim();
-    console.log(`📝 Senha digitada pelo usuário: "${passwordTrimmed}"`);
+    if (!idColaborador || !password) {
+        return res.status(400).json({ success: false, message: "ID e senha são obrigatórios!" });
+    }
 
     const storedPassword = await getUserPassword(idColaborador);
 
@@ -57,15 +58,13 @@ app.post("/login", async (req, res) => {
         return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
     }
 
-    if (storedPassword === passwordTrimmed) {
-        console.log("✅ Login bem-sucedido!");
+    if (storedPassword.trim() === password.trim()) {
         return res.json({ success: true, message: "OK" });
     } else {
-        console.log("❌ Senha incorreta!");
-        console.log(`🔄 Comparação - Banco: "${storedPassword}" | Digitada: "${passwordTrimmed}"`);
         return res.json({ success: false, message: "ID ou senha incorretos!" });
     }
 });
+
 
 // Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
