@@ -8,43 +8,41 @@ const PORT = 3000;
 app.use(express.json());
 app.use(cors());
 
-// Configuração da conexão com o SQL Server Azure
+// Configuração do banco de dados
 const config = {
-    user: "admin_gs", // Substitua pelo seu usuário do SQL Server
-    password: "Userpass@30", // Substitua pela sua senha do banco
-    server: "srv-gs.database.windows.net", // Substitua pelo seu servidor no Azure
+    user: "admin_gs",
+    password: "Userpass@30",
+    server: "srv-gs.database.windows.net",
     database: "dw",
     options: {
-        encrypt: true, // Necessário para conexões seguras no Azure
+        encrypt: true,
         enableArithAbort: true
     }
 };
 
-// Função para conectar ao banco e buscar a senha do usuário
+// Função para buscar senha do usuário no banco
 async function getUserPassword(idColaborador) {
     try {
         await sql.connect(config);
-        console.log(`🔍 Buscando usuário com IdColaboradorNexti: ${idColaborador}`);
+        console.log(`🔍 Buscando usuário com ID: ${idColaborador}`);
 
         const result = await sql.query`
             SELECT Senha FROM [SolicitacaoExtra].[Colaborador] WHERE IdColaboradorNexti = ${idColaborador}
         `;
 
         if (result.recordset.length === 0) {
-            console.log("❌ Usuário não encontrado no banco.");
+            console.log("❌ Usuário não encontrado.");
             return null;
         }
 
-        const storedPassword = result.recordset[0].Senha;
-        console.log(`🔑 Senha armazenada no banco: "${storedPassword}"`);
-        return storedPassword.trim(); // Remove espaços extras
+        return result.recordset[0].Senha.trim();
     } catch (err) {
         console.error("❌ Erro ao buscar usuário:", err);
         return null;
     }
 }
 
-// Rota de login
+// ✅ **Definir a rota de login corretamente**
 app.post("/login", async (req, res) => {
     const { idColaborador, password } = req.body;
 
@@ -58,13 +56,12 @@ app.post("/login", async (req, res) => {
         return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
     }
 
-    if (storedPassword.trim() === password.trim()) {
+    if (storedPassword === password.trim()) {
         return res.json({ success: true, message: "OK" });
     } else {
         return res.json({ success: false, message: "ID ou senha incorretos!" });
     }
 });
 
-
-// Iniciar o servidor
+// ✅ **Certifique-se de que o servidor está escutando corretamente**
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
