@@ -1,5 +1,3 @@
-// Importa os dois arquivos de rota
-require("./server");
-require("./cadastrarCliente");
+require("./server"); // Isso já inicia tudo corretamente
 
-console.log("ðŸš€ Servidores rodando corretamente no Render!");
+console.log("?? Servidor rodando corretamente no Render!");
