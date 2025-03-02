@@ -21,12 +21,12 @@ const pool = new Pool({
 });
 
 // Função para buscar senha do usuário no banco
-async function getUserPassword(idColaborador) {
+async function getUserPassword(id) {
     try {
-        console.log(`🔍 Buscando usuário com ID: ${idColaborador}`);
+        console.log(`🔍 Buscando usuário com ID: ${id}`);
         const result = await pool.query(
             "SELECT senha_hash FROM usuarios WHERE id = $1", 
-            [idColaborador]
+            [id]
         );
 
         if (result.rows.length === 0) {
@@ -43,13 +43,13 @@ async function getUserPassword(idColaborador) {
 
 // ✅ Rota de login
 app.post("/login", async (req, res) => {
-    const { idColaborador, password } = req.body;
+    const { id, password } = req.body;
 
-    if (!idColaborador || !password) {
+    if (!id || !password) {
         return res.status(400).json({ success: false, message: "ID e senha são obrigatórios!" });
     }
 
-    const storedPassword = await getUserPassword(idColaborador);
+    const storedPassword = await getUserPassword(id);
 
     if (!storedPassword) {
         return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
