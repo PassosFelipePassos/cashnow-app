@@ -25,7 +25,7 @@ async function getUserPassword(idColaborador) {
     try {
         console.log(`🔍 Buscando usuário com ID: ${idColaborador}`);
         const result = await pool.query(
-            "SELECT senha FROM solicitacaoextra.colaborador WHERE idcolaboradornexti = $1", 
+            "SELECT senha_hash FROM usuarios WHERE id = $1", 
             [idColaborador]
         );
 
