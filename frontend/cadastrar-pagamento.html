@@ -32,17 +32,20 @@
 <div class="container">
     <div class="form-box">
         <h2>Acompanhamento de Pagamentos</h2>
-        <table id="tabelaPagamentos">
-            <thead>
-                <tr>
-                    <th>Cliente</th>
-                    <!-- Colunas das datas serão preenchidas dinamicamente -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dados dos pagamentos serão preenchidos dinamicamente -->
-            </tbody>
-        </table>
+
+        <div class="table-container">
+            <table id="tabelaPagamentos">
+                <thead>
+                    <tr id="headerRow">
+                        <th>Cliente</th>
+                        <!-- Datas serão preenchidas dinamicamente -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados dos pagamentos serão preenchidos dinamicamente -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -57,7 +60,7 @@
             const pagamentos = await response.json();
 
             const tabela = document.getElementById("tabelaPagamentos");
-            const thead = tabela.querySelector("thead tr");
+            const headerRow = document.getElementById("headerRow");
             const tbody = tabela.querySelector("tbody");
 
             tbody.innerHTML = ""; // Limpa a tabela antes de carregar os dados
@@ -71,29 +74,37 @@
                     pagamentosPorCliente[pagamento.nome_cliente] = [];
                 }
                 pagamentosPorCliente[pagamento.nome_cliente].push(pagamento);
-                colunasDatas.add(pagamento.data);
+                colunasDatas.add(pagamento.data_pagamento);
             });
 
-            // Adiciona as colunas de datas dinamicamente
-            thead.innerHTML = "<th>Cliente</th>";
-            Array.from(colunasDatas).sort().forEach(data => {
-                thead.innerHTML += `<th>${data}</th>`;
+            // Ordena e adiciona datas no cabeçalho da tabela
+            headerRow.innerHTML = "<th>Cliente</th>";
+            const datasOrdenadas = Array.from(colunasDatas).sort();
+            datasOrdenadas.forEach(data => {
+                headerRow.innerHTML += `<th>${data}</th>`;
             });
 
             // Preenche os pagamentos na tabela
             for (let cliente in pagamentosPorCliente) {
                 let row = `<tr><td>${cliente}</td>`;
 
-                Array.from(colunasDatas).sort().forEach(data => {
-                    let pagamento = pagamentosPorCliente[cliente].find(p => p.data === data);
+                datasOrdenadas.forEach(data => {
+                    let pagamento = pagamentosPorCliente[cliente].find(p => p.data_pagamento === data);
                     if (pagamento) {
-                        let cor = pagamento.status === "Pago" ? "green" : 
-                                  (new Date(pagamento.data) < new Date() && pagamento.status === "Aberto") ? "red" : 
-                                  "gray";
-                        
-                        row += `<td style="background-color: ${cor}; color: white; text-align: center; cursor: pointer;" onclick="confirmarPagamento(${pagamento.idpagamento})">
-                                    R$ ${pagamento.valor.toFixed(2)}
-                                </td>`;
+                        let cor;
+                        if (pagamento.status === "Pago") {
+                            cor = "green"; // Pago
+                        } else if (new Date(pagamento.data_pagamento) < new Date() && pagamento.status === "Aberto") {
+                            cor = "red"; // Vencido
+                        } else {
+                            cor = "gray"; // Aberto
+                        }
+
+                        row += `
+                            <td style="background-color: ${cor}; color: white; text-align: center; cursor: pointer;"
+                                onclick="confirmarPagamento(${pagamento.idpagamento})">
+                                R$ ${pagamento.valor.toFixed(2)}
+                            </td>`;
                     } else {
                         row += "<td></td>";
                     }
@@ -130,98 +141,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", carregarPagamentos);
-	
-	async function carregarPagamentos() {
-    try {
-        const response = await fetch("https://cashnow-app.onrender.com/listar-pagamentos");
-        const pagamentos = await response.json();
-
-        console.log("📊 Pagamentos recebidos:", pagamentos); // Debug no console
-
-        const tabela = document.getElementById("tabelaPagamentos");
-        const thead = tabela.querySelector("thead tr");
-        const tbody = tabela.querySelector("tbody");
-
-        tbody.innerHTML = ""; // Limpa a tabela antes de carregar os dados
-
-        let colunasDatas = new Set();
-
-        // Organiza pagamentos por cliente
-        const pagamentosPorCliente = {};
-        pagamentos.forEach(pagamento => {
-            if (!pagamentosPorCliente[pagamento.nome_cliente]) {
-                pagamentosPorCliente[pagamento.nome_cliente] = [];
-            }
-            pagamentosPorCliente[pagamento.nome_cliente].push(pagamento);
-            colunasDatas.add(pagamento.data_pagamento);
-        });
-
-        // Adiciona as colunas de datas dinamicamente
-        thead.innerHTML = "<th>Cliente</th>";
-        colunasDatas = Array.from(colunasDatas).sort();
-        colunasDatas.forEach(data => {
-            thead.innerHTML += `<th>${formatarData(data)}</th>`;
-        });
-
-        // Preenche os pagamentos na tabela
-        for (let cliente in pagamentosPorCliente) {
-            let row = `<tr><td>${cliente}</td>`;
-
-            colunasDatas.forEach(data => {
-                let pagamento = pagamentosPorCliente[cliente].find(p => p.data_pagamento === data);
-                if (pagamento) {
-                    let cor = pagamento.status === "Pago" ? "green" : 
-                              (new Date(pagamento.data_pagamento) < new Date() && pagamento.status === "Aberto") ? "red" : 
-                              "gray";
-
-                    row += `<td style="background-color: ${cor}; color: white; text-align: center; cursor: pointer;" onclick="confirmarPagamento(${pagamento.idpagamento})">
-                                R$ ${pagamento.valor.toFixed(2)}
-                            </td>`;
-                } else {
-                    row += "<td></td>";
-                }
-            });
-
-            row += "</tr>";
-            tbody.innerHTML += row;
-        }
-
-    } catch (error) {
-        console.error("Erro ao carregar pagamentos:", error);
-    }
-}
-
-// Função para formatar a data no formato DD/MM/AAAA
-function formatarData(data) {
-    const dataObj = new Date(data);
-    return dataObj.toLocaleDateString("pt-BR");
-}
-
-async function confirmarPagamento(idpagamento) {
-    if (confirm("Deseja confirmar o pagamento desta parcela?")) {
-        try {
-            const response = await fetch(`https://cashnow-app.onrender.com/confirmar-pagamento/${idpagamento}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" }
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                alert("Pagamento confirmado com sucesso!");
-                carregarPagamentos(); // Atualiza a tabela após confirmar
-            } else {
-                alert("Erro ao confirmar pagamento: " + data.message);
-            }
-        } catch (error) {
-            console.error("❌ Erro ao confirmar pagamento:", error);
-        }
-    }
-}
-
-// Carrega os pagamentos ao carregar a página
-document.addEventListener("DOMContentLoaded", carregarPagamentos);
-
-	
 </script>
 
 </body>
