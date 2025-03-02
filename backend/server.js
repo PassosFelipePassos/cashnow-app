@@ -304,15 +304,5 @@ app.get("/listar-pagamentos", async (req, res) => {
 });
 
 
-
-
-
-// ✅ Iniciar o servidor
-app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
-
-
-
-
-
 // ✅ Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
