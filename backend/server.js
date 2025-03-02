@@ -130,7 +130,7 @@ app.post("/cadastrar-emprestimo", async (req, res) => {
             console.log(`💲 Parcela ${i + 1} cadastrada para ${dataParcela.toISOString().split("T")[0]}`);
             
             // Avança um mês para a próxima parcela
-            dataParcela.setMonth(dataParcela.getMonth() + 1);
+            dataParcela.setDate(dataParcela.getDate() + 1);
         }
 
         return res.json({ success: true, message: "Empréstimo cadastrado com sucesso!" });
