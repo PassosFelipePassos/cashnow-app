@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const sql = require("mssql");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = 3000;
@@ -8,41 +8,40 @@ const PORT = 3000;
 app.use(express.json());
 app.use(cors());
 
-// Configuração do banco de dados
-const config = {
-    user: "admin_gs",
-    password: "Userpass@30",
-    server: "srv-gs.database.windows.net",
-    database: "dw",
-    options: {
-        encrypt: true,
-        enableArithAbort: true
+// Configuração do banco de dados PostgreSQL
+const pool = new Pool({
+    user: "neondb_owner",
+    host: "ep-little-mouse-a8z1m83y-pooler.eastus2.azure.neon.tech",
+    database: "neondb",
+    password: "npg_DaWpjMJ08HbR",
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false
     }
-};
+});
 
 // Função para buscar senha do usuário no banco
 async function getUserPassword(idColaborador) {
     try {
-        await sql.connect(config);
         console.log(`🔍 Buscando usuário com ID: ${idColaborador}`);
+        const result = await pool.query(
+            "SELECT senha FROM solicitacaoextra.colaborador WHERE idcolaboradornexti = $1", 
+            [idColaborador]
+        );
 
-        const result = await sql.query`
-            SELECT Senha FROM [SolicitacaoExtra].[Colaborador] WHERE IdColaboradorNexti = ${idColaborador}
-        `;
-
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             console.log("❌ Usuário não encontrado.");
             return null;
         }
 
-        return result.recordset[0].Senha.trim();
+        return result.rows[0].senha.trim();
     } catch (err) {
         console.error("❌ Erro ao buscar usuário:", err);
         return null;
     }
 }
 
-// ✅ **Definir a rota de login corretamente**
+// ✅ Rota de login
 app.post("/login", async (req, res) => {
     const { idColaborador, password } = req.body;
 
@@ -63,7 +62,5 @@ app.post("/login", async (req, res) => {
     }
 });
 
-
-
-// ✅ **Certifique-se de que o servidor está escutando corretamente**
+// ✅ Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
