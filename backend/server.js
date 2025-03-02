@@ -122,7 +122,7 @@ app.post("/cadastrar-emprestimo", async (req, res) => {
 
         for (let i = 0; i < quantidade_parcela; i++) {
             await pool.query(
-                `INSERT INTO pagamento (idemprestimo, idcliente, data, valor, status)
+                `INSERT INTO pagamento (idemprestimo, idcliente, data_pagamento, valor, status)
                  VALUES ($1, $2, $3, $4, 'Aberto')`,
                 [idemprestimo, idcliente, dataParcela.toISOString().split("T")[0], valorParcela]
             );
