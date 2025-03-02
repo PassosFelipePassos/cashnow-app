@@ -37,7 +37,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
 
         // Insere o novo cliente
         const resultCliente = await client.query(
-            `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, data_nascimento, nome_mae)
+            `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, datanascimento, nome_mae)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
             [nome, dd, telefone, rg, cpf, dataNascimento, nomeMae]
         );
