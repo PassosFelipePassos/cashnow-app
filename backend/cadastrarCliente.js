@@ -5,7 +5,7 @@ const router = express.Router();
 
 // ? Rota para cadastrar cliente com endereço e veículo
 router.post("/cadastrar-cliente", async (req, res) => {
-    console.log("?? Dados recebidos no backend:", req.body); // Log para depuração
+    console.log("?? Dados recebidos no backend:", JSON.stringify(req.body, null, 2));
 
     const client = await pool.connect(); // Conexão com o banco
 
