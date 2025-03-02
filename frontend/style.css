@@ -224,3 +224,76 @@ p#mensagem {
         padding: 10px;
     }
 }
+
+
+/* Ajustes na tabela */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Para rolagem horizontal caso precise */
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+/* Ajusta a largura da primeira coluna (Cliente) */
+th:first-child, td:first-child {
+    text-align: left;
+    font-weight: bold;
+    min-width: 180px;
+}
+
+/* Cores de status */
+.pago {
+    background-color: green;
+    color: white;
+    cursor: default;
+}
+
+.aberto {
+    background-color: gray;
+    color: white;
+    cursor: pointer;
+}
+
+.vencido {
+    background-color: red;
+    color: white;
+    cursor: pointer;
+}
+
+/* Estiliza hover nos dias que podem ser pagos */
+.aberto:hover, .vencido:hover {
+    opacity: 0.8;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    th, td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    th:first-child, td:first-child {
+        min-width: 120px;
+    }
+}
+

@@ -38,7 +38,7 @@
                 <thead>
                     <tr id="headerRow">
                         <th>Cliente</th>
-                        <!-- Datas serão preenchidas dinamicamente -->
+                        <!-- Datas serão adicionadas dinamicamente -->
                     </tr>
                 </thead>
                 <tbody>
@@ -91,18 +91,17 @@
                 datasOrdenadas.forEach(data => {
                     let pagamento = pagamentosPorCliente[cliente].find(p => p.data_pagamento === data);
                     if (pagamento) {
-                        let cor;
+                        let classe;
                         if (pagamento.status === "Pago") {
-                            cor = "green"; // Pago
+                            classe = "pago"; // Pago
                         } else if (new Date(pagamento.data_pagamento) < new Date() && pagamento.status === "Aberto") {
-                            cor = "red"; // Vencido
+                            classe = "vencido"; // Vencido
                         } else {
-                            cor = "gray"; // Aberto
+                            classe = "aberto"; // Aberto
                         }
 
                         row += `
-                            <td style="background-color: ${cor}; color: white; text-align: center; cursor: pointer;"
-                                onclick="confirmarPagamento(${pagamento.idpagamento})">
+                            <td class="${classe}" onclick="confirmarPagamento(${pagamento.idpagamento})">
                                 R$ ${pagamento.valor.toFixed(2)}
                             </td>`;
                     } else {
