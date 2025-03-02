@@ -7,25 +7,20 @@ const router = express.Router();
 router.post("/cadastrar-cliente", async (req, res) => {
     console.log("?? Dados recebidos no backend:", JSON.stringify(req.body, null, 2));
 
-    // Converte todas as chaves para minúsculas automaticamente
-    const normalizeKeys = obj => {
-        if (typeof obj !== 'object' || obj === null) return obj;
-        return Object.keys(obj).reduce((acc, key) => {
-            acc[key.toLowerCase()] = normalizeKeys(obj[key]);
-            return acc;
-        }, {});
-    };
-
-    const normalizedBody = normalizeKeys(req.body);
-    
     const {
-        nome, dd, telefone, rg, cpf, datanascimento, nomemae,
-        endereco, veiculo
-    } = normalizedBody;
+        nome, dd, telefone, rg, cpf, dataNascimento, nomeMae,
+        endereco = {}, veiculo = {}
+    } = req.body;
 
     if (!nome || !cpf || !telefone || !endereco || !veiculo) {
         console.log("? Campos ausentes:", { nome, cpf, telefone, endereco, veiculo });
         return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
+    }
+
+    // Verifica se os dados do veículo foram enviados corretamente
+    if (!veiculo.marcaModelo || !veiculo.placa || !veiculo.ano || !veiculo.cor) {
+        console.log("? Campos do veículo ausentes:", veiculo);
+        return res.status(400).json({ success: false, message: "Todos os dados do veículo são obrigatórios!" });
     }
 
     const client = await pool.connect();
@@ -44,7 +39,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
         const resultCliente = await client.query(
             `INSERT INTO public.cliente (nome, dd, telefone, rg, cpf, data_nascimento, nome_mae)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [nome, dd, telefone, rg, cpf, datanascimento, nomemae]
+            [nome, dd, telefone, rg, cpf, dataNascimento, nomeMae]
         );
 
         const clienteId = resultCliente.rows[0].id;
@@ -60,7 +55,7 @@ router.post("/cadastrar-cliente", async (req, res) => {
         await client.query(
             `INSERT INTO public.veiculocliente (cliente_id, marca_modelo, placa, ano, cor)
              VALUES ($1, $2, $3, $4, $5)`,
-            [clienteId, veiculo.marcamodelo, veiculo.placa, veiculo.ano, veiculo.cor]
+            [clienteId, veiculo.marcaModelo, veiculo.placa, veiculo.ano, veiculo.cor]
         );
 
         await client.query("COMMIT");
