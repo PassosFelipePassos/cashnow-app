@@ -67,5 +67,36 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.get("/listar-clientes", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT idcliente, nome FROM cliente ORDER BY nome");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Erro ao buscar clientes:", error);
+        res.status(500).json({ success: false, message: "Erro ao buscar clientes!" });
+    }
+});
+
+app.post("/cadastrar-pagamento", async (req, res) => {
+    const { idcliente, data_pagamento, valor } = req.body;
+
+    if (!idcliente || !data_pagamento || isNaN(valor)) {
+        return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
+    }
+
+    try {
+        await pool.query(
+            "INSERT INTO pagamento (idcliente, data_pagamento, valor) VALUES ($1, $2, $3)",
+            [idcliente, data_pagamento, valor]
+        );
+        res.json({ success: true, message: "Pagamento cadastrado com sucesso!" });
+    } catch (error) {
+        console.error("Erro ao cadastrar pagamento:", error);
+        res.status(500).json({ success: false, message: "Erro ao cadastrar pagamento!" });
+    }
+});
+
+
+
 // ✅ Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
