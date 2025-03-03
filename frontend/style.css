@@ -36,6 +36,7 @@ html, body {
     right: 0;
     z-index: 1000;
     height: 60px;
+	z-index: 10000; /* Garante que o cabeçalho fique acima do menu */
 }
 
 /* Logo no cabeçalho */
@@ -68,6 +69,7 @@ html, body {
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     transition: 0.3s;
     padding-top: 60px;
+	z-index: 9999; /* Garante que fique acima de tudo */
 }
 
 .menu.active {
