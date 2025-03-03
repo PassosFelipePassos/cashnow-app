@@ -145,6 +145,29 @@ app.get("/listar-pagamentos/:idcliente", async (req, res) => {
 });
 
 
+app.put("/confirmar-pagamento/:idpagamento", async (req, res) => {
+    const { idpagamento } = req.params;
+
+    try {
+        const result = await pool.query(
+            "UPDATE pagamento SET status = 'Pago' WHERE idpagamento = $1 RETURNING *",
+            [idpagamento]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, message: "Pagamento não encontrado!" });
+        }
+
+        console.log(`✅ Pagamento ${idpagamento} confirmado como Pago!`);
+        res.json({ success: true, message: "Pagamento confirmado com sucesso!" });
+
+    } catch (error) {
+        console.error("❌ Erro ao confirmar pagamento:", error);
+        res.status(500).json({ success: false, message: "Erro ao confirmar pagamento!" });
+    }
+});
+
+
 
 // ✅ Iniciar o servidor
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
