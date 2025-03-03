@@ -1,137 +1,173 @@
-// ?? Fun��o para verificar autentica��o e proteger p�ginas
-function verificarAutenticacao() {
-    const token = localStorage.getItem("token");
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
 
-    if (!token) {
-        window.location.href = "index.html"; // Redireciona para login se n�o estiver autenticado
-        return;
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+// ✅ Habilita CORS para o frontend
+app.use(cors({
+    origin: "https://cashnow-app.vercel.app", // Permite requisições do frontend
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization"
+}));
+
+// Configuração do banco de dados PostgreSQL
+const pool = new Pool({
+    user: "neondb_owner",
+    host: "ep-little-mouse-a8z1m83y-pooler.eastus2.azure.neon.tech",
+    database: "neondb",
+    password: "npg_DaWpjMJ08HbR",
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+// ✅ Importando rotas de cadastro
+const cadastrarCliente = require("./cadastrarCliente"); // Certifique-se de que o arquivo está na mesma pasta
+app.use("/", cadastrarCliente); // Agora as rotas de cadastro funcionarão
+
+// ✅ Rota de login
+app.post("/login", async (req, res) => {
+    const { id, password } = req.body;
+
+    if (!id || !password) {
+        return res.status(400).json({ success: false, message: "ID e senha são obrigatórios!" });
     }
 
-    fetch("https://cashnow-app.onrender.com/listar-clientes", {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${token}` }
-    })
-    .then(response => {
-        if (!response.ok) {
-            localStorage.removeItem("token");
-            window.location.href = "index.html"; // Redireciona se o token for inv�lido
+    try {
+        console.log(`🔍 Buscando usuário com ID: ${id}`);
+        
+        const result = await pool.query("SELECT senha_hash FROM usuarios WHERE id = $1", [id]);
+
+        console.log("🔎 Resultado da consulta:", result.rows);
+
+        if (result.rows.length === 0) {
+            console.log("❌ Usuário não encontrado.");
+            return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
         }
-    })
-    .catch(() => {
-        localStorage.removeItem("token");
-        window.location.href = "index.html";
-    });
-}
 
+        const storedPassword = result.rows[0].senha_hash?.trim();
 
-// ?? Chama a fun��o de autentica��o ao carregar a p�gina
-document.addEventListener("DOMContentLoaded", verificarAutenticacao);
+        if (!storedPassword) {
+            console.log("❌ Senha não definida para este usuário.");
+            return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
+        }
 
-// ?? Fun��o para carregar clientes na lista suspensa
-async function carregarClientes() {
-    try {
-        const response = await fetch("https://cashnow-app.onrender.com/listar-clientes", {
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-
-        if (!response.ok) throw new Error("Erro ao buscar clientes");
-
-        const clientes = await response.json();
-
-        const select = document.getElementById("idcliente");
-        select.innerHTML = '<option value="">Selecione um cliente</option>';
-
-        clientes.forEach(cliente => {
-            const option = document.createElement("option");
-            option.value = cliente.idcliente;
-            option.textContent = cliente.nome;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar clientes:", error);
-    }
-}
-
-// ?? Fun��o para carregar pagamentos do cliente selecionado
-async function carregarPagamentos() {
-    const idcliente = document.getElementById("idcliente").value;
-
-    if (!idcliente) {
-        document.getElementById("tabelaPagamentos").innerHTML = "<p>Selecione um cliente.</p>";
-        return;
-    }
-
-    try {
-        const response = await fetch(`https://cashnow-app.onrender.com/listar-pagamentos/${idcliente}`, {
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-
-        if (!response.ok) throw new Error("Erro ao buscar pagamentos");
-
-        const pagamentos = await response.json();
-
-        const tabela = document.getElementById("tabelaPagamentos");
-        tabela.innerHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                        <th>A��o</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${pagamentos.map(pagamento => {
-                        let cor = pagamento.status === "Pago" ? "green" : 
-                                  (new Date(pagamento.data_pagamento) < new Date() && pagamento.status === "Aberto") ? "red" : 
-                                  "gray";
-
-                        return `
-                            <tr>
-                                <td>${new Date(pagamento.data_pagamento).toLocaleDateString()}</td>
-                                <td>R$ ${parseFloat(pagamento.valor).toFixed(2)}</td>
-                                <td style="color: ${cor}; font-weight: bold;">${pagamento.status}</td>
-                                <td>
-                                    ${pagamento.status === "Aberto" ? `<button onclick="confirmarPagamento(${pagamento.idpagamento})">Confirmar</button>` : ""}
-                                </td>
-                            </tr>
-                        `;
-                    }).join("")}
-                </tbody>
-            </table>
-        `;
-    } catch (error) {
-        console.error("Erro ao carregar pagamentos:", error);
-    }
-}
-
-// ? Fun��o para confirmar pagamento
-async function confirmarPagamento(idpagamento) {
-    if (!confirm("Deseja confirmar este pagamento?")) return;
-
-    try {
-        const response = await fetch(`https://cashnow-app.onrender.com/confirmar-pagamento/${idpagamento}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-
-        if (!response.ok) throw new Error("Erro ao confirmar pagamento");
-
-        const data = await response.json();
-        if (data.success) {
-            alert("Pagamento confirmado com sucesso!");
-            carregarPagamentos(); // Atualiza a tabela ap�s confirma��o
+        if (storedPassword === password.trim()) {
+            return res.json({ success: true, message: "OK" });
         } else {
-            alert("Erro ao confirmar pagamento: " + data.message);
+            return res.json({ success: false, message: "ID ou senha incorretos!" });
         }
-    } catch (error) {
-        console.error("Erro ao confirmar pagamento:", error);
+    } catch (err) {
+        console.error("❌ Erro ao buscar usuário:", err);
+        return res.status(500).json({ success: false, message: "Erro interno no servidor" });
     }
-}
+});
 
-// ?? Adiciona evento ao selecionar um cliente
-document.getElementById("idcliente")?.addEventListener("change", carregarPagamentos);
+app.get("/listar-clientes", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT idcliente, nome FROM cliente ORDER BY nome");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Erro ao buscar clientes:", error);
+        res.status(500).json({ success: false, message: "Erro ao buscar clientes!" });
+    }
+});
 
-// ?? Carregar clientes ao iniciar a p�gina
-document.addEventListener("DOMContentLoaded", carregarClientes);
+// ✅ Rota para cadastrar um novo empréstimo
+app.post("/cadastrar-emprestimo", async (req, res) => {
+    const { idcliente, valor, quantidade_parcela, data_inicio_pagamento } = req.body;
+
+    if (!idcliente || !valor || !quantidade_parcela || !data_inicio_pagamento) {
+        return res.status(400).json({ success: false, message: "Todos os campos são obrigatórios!" });
+    }
+
+    try {
+        // 💰 1️⃣ Inserir o empréstimo na tabela `emprestimo`
+        const result = await pool.query(
+            `INSERT INTO emprestimo (idcliente, valor, quantidade_parcela, data_inicio_pagamento)
+             VALUES ($1, $2, $3, $4) RETURNING idemprestimo`,
+            [idcliente, valor, quantidade_parcela, data_inicio_pagamento]
+        );
+
+        const idemprestimo = result.rows[0].idemprestimo;
+        console.log("✅ Empréstimo cadastrado! ID:", idemprestimo);
+
+        // 💰 2️⃣ Criar as parcelas na tabela `pagamento`
+        const valorParcela = (valor / quantidade_parcela).toFixed(2);
+        let dataParcela = new Date(data_inicio_pagamento);
+
+        for (let i = 0; i < quantidade_parcela; i++) {
+            await pool.query(
+                `INSERT INTO pagamento (idemprestimo, idcliente, data_pagamento, valor, status)
+                 VALUES ($1, $2, $3, $4, 'Aberto')`,
+                [idemprestimo, idcliente, dataParcela.toISOString().split("T")[0], valorParcela]
+            );
+
+            console.log(`💲 Parcela ${i + 1} cadastrada para ${dataParcela.toISOString().split("T")[0]}`);
+            
+            // Avança um dia para a próxima parcela
+            dataParcela.setDate(dataParcela.getDate() + 1);
+        }
+
+        return res.json({ success: true, message: "Empréstimo cadastrado com sucesso!" });
+
+    } catch (error) {
+        console.error("❌ Erro ao cadastrar empréstimo:", error);
+        return res.status(500).json({ success: false, message: "Erro ao cadastrar empréstimo!" });
+    }
+});
+
+app.get("/listar-pagamentos/:idcliente", async (req, res) => {
+    const { idcliente } = req.params;
+
+    try {
+        const query = `
+            SELECT p.idpagamento, p.data_pagamento, p.valor, p.status
+            FROM pagamento p
+            WHERE p.idcliente = $1
+            ORDER BY p.data_pagamento;
+        `;
+
+        const result = await pool.query(query, [idcliente]);
+
+        console.log("🔍 Pagamentos encontrados:", result.rows); // Adiciona LOG
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("❌ Erro ao listar pagamentos:", error);
+        res.status(500).json({ success: false, message: "Erro ao buscar pagamentos." });
+    }
+});
+
+
+app.put("/confirmar-pagamento/:idpagamento", async (req, res) => {
+    const { idpagamento } = req.params;
+
+    try {
+        const result = await pool.query(
+            "UPDATE pagamento SET status = 'Pago' WHERE idpagamento = $1 RETURNING *",
+            [idpagamento]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, message: "Pagamento não encontrado!" });
+        }
+
+        console.log(`✅ Pagamento ${idpagamento} confirmado como Pago!`);
+        res.json({ success: true, message: "Pagamento confirmado com sucesso!" });
+
+    } catch (error) {
+        console.error("❌ Erro ao confirmar pagamento:", error);
+        res.status(500).json({ success: false, message: "Erro ao confirmar pagamento!" });
+    }
+});
+
+
+
+// ✅ Iniciar o servidor
+app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
