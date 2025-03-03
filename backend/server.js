@@ -43,30 +43,27 @@ app.post("/login", async (req, res) => {
         
         const result = await pool.query("SELECT senha_hash FROM usuarios WHERE id = $1", [id]);
 
-        console.log("🔎 Resultado da consulta:", result.rows);
-
         if (result.rows.length === 0) {
-            console.log("❌ Usuário não encontrado.");
-            return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
+            return res.json({ success: false, message: "Usuário não encontrado ou senha incorreta!" });
         }
 
         const storedPassword = result.rows[0].senha_hash?.trim();
 
-        if (!storedPassword) {
-            console.log("❌ Senha não definida para este usuário.");
-            return res.json({ success: false, message: "Usuário não encontrado ou sem senha cadastrada!" });
-        }
-
-        if (storedPassword === password.trim()) {
-            return res.json({ success: true, message: "OK" });
-        } else {
+        if (!storedPassword || storedPassword !== password.trim()) {
             return res.json({ success: false, message: "ID ou senha incorretos!" });
         }
+
+        // Criando um "token fake" para simular autenticação
+        const token = `token_${id}_${new Date().getTime()}`;
+
+        return res.json({ success: true, token }); // Envia o token para o frontend
+
     } catch (err) {
         console.error("❌ Erro ao buscar usuário:", err);
         return res.status(500).json({ success: false, message: "Erro interno no servidor" });
     }
 });
+
 
 app.get("/listar-clientes", async (req, res) => {
     try {
