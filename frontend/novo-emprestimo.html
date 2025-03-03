@@ -22,9 +22,8 @@
     <ul>
         <li><a href="cadastrar-cliente.html">Cadastrar Novo Cliente</a></li>
         <li class="active"><a href="novo-emprestimo.html">Novo Empréstimo</a></li>
-        <!-- <li><a href="acompanhamento-emprestimos.html">Acompanhamento de Empréstimos</a></li> -->
         <li><a href="cadastrar-pagamento.html">Cadastrar Pagamento</a></li>
-        <li><a href="index.html">Sair</a></li>
+        <li><button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button></li>
     </ul>
 </nav>
 
@@ -36,7 +35,6 @@
             <label for="idcliente">Cliente:</label>
             <select id="idcliente" required>
                 <option value="">Selecione um cliente</option>
-                <!-- Aqui os clientes serão carregados dinamicamente -->
             </select>
 
             <label for="valor">Valor do Empréstimo:</label>
@@ -55,83 +53,154 @@
     </div>
 </div>
 
-
-
 <script>
-
 // 🔒 Verifica se o usuário está autenticado ao carregar a página
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("token");
 
     if (!token) {
         alert("Sessão expirada! Faça login novamente.");
-        window.location.href = "index.html"; // Redireciona para a tela de login
+        window.location.href = "index.html"; // Redireciona para login
     }
 });
 
+// ⏳ Expiração da Sessão por Inatividade
+let tempoInatividade;
+function resetarTempo() {
+    clearTimeout(tempoInatividade);
+    tempoInatividade = setTimeout(() => {
+        alert("Sessão expirada por inatividade! Faça login novamente.");
+        localStorage.removeItem("token");
+        window.location.href = "index.html"; // Redireciona para login
+    }, 5 * 60 * 1000); // 5 minutos
+}
 
+document.addEventListener("mousemove", resetarTempo);
+document.addEventListener("keydown", resetarTempo);
+document.addEventListener("click", resetarTempo);
+resetarTempo(); // Inicia o temporizador ao carregar a página
 
+// 🔴 Logout (Limpa Token e Redireciona)
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index.html"; // Redireciona para login
+}
 
-    function toggleMenu() {
-        document.getElementById("sidebar").classList.toggle("active");
+// 🔄 Carregar clientes na lista suspensa
+async function carregarClientes() {
+    try {
+        const response = await fetch("https://cashnow-app.onrender.com/listar-clientes", {
+            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+        });
+
+        const clientes = await response.json();
+        const select = document.getElementById("idcliente");
+        select.innerHTML = '<option value="">Selecione um cliente</option>';
+
+        clientes.forEach(cliente => {
+            const option = document.createElement("option");
+            option.value = cliente.idcliente;
+            option.textContent = cliente.nome;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+    }
+}
+
+// 📩 Cadastrar empréstimo
+async function cadastrarEmprestimo() {
+    const emprestimoData = {
+        idcliente: document.getElementById("idcliente").value,
+        valor: parseFloat(document.getElementById("valor").value),
+        quantidade_parcela: parseInt(document.getElementById("quantidade_parcela").value),
+        data_inicio_pagamento: document.getElementById("data_inicio_pagamento").value
+    };
+
+    if (!emprestimoData.idcliente || isNaN(emprestimoData.valor) || isNaN(emprestimoData.quantidade_parcela) || !emprestimoData.data_inicio_pagamento) {
+        alert("Todos os campos são obrigatórios!");
+        return;
     }
 
-    async function carregarClientes() {
-        try {
-            const response = await fetch("https://cashnow-app.onrender.com/listar-clientes");
-            const clientes = await response.json();
-            const select = document.getElementById("idcliente");
+    console.log("📤 Enviando dados do empréstimo:", JSON.stringify(emprestimoData, null, 2));
 
-            clientes.forEach(cliente => {
-                const option = document.createElement("option");
-                option.value = cliente.idcliente;
-                option.textContent = cliente.nome;
-                select.appendChild(option);
-            });
-        } catch (error) {
-            console.error("Erro ao carregar clientes:", error);
+    try {
+        const response = await fetch("https://cashnow-app.onrender.com/cadastrar-emprestimo", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify(emprestimoData)
+        });
+
+        const data = await response.json();
+        console.log("📥 Resposta do servidor:", data);
+
+        if (data.success) {
+            alert("Empréstimo cadastrado com sucesso!");
+            document.getElementById("emprestimoForm").reset();
+        } else {
+            alert("Erro ao cadastrar empréstimo: " + data.message);
         }
+    } catch (error) {
+        console.error("❌ Erro ao cadastrar empréstimo:", error);
+        alert("Erro ao conectar com o servidor!");
     }
+}
 
-    async function cadastrarEmprestimo() {
-        const emprestimoData = {
-            idcliente: document.getElementById("idcliente").value,
-            valor: parseFloat(document.getElementById("valor").value),
-            quantidade_parcela: parseInt(document.getElementById("quantidade_parcela").value),
-            data_inicio_pagamento: document.getElementById("data_inicio_pagamento").value
-        };
-
-        if (!emprestimoData.idcliente || isNaN(emprestimoData.valor) || isNaN(emprestimoData.quantidade_parcela) || !emprestimoData.data_inicio_pagamento) {
-            alert("Todos os campos são obrigatórios!");
-            return;
-        }
-
-        console.log("📤 Enviando dados do empréstimo:", JSON.stringify(emprestimoData, null, 2));
-
-        try {
-            const response = await fetch("https://cashnow-app.onrender.com/cadastrar-emprestimo", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(emprestimoData)
-            });
-
-            const data = await response.json();
-            console.log("📥 Resposta do servidor:", data);
-
-            if (data.success) {
-                alert("Empréstimo cadastrado com sucesso!");
-                document.getElementById("emprestimoForm").reset();
-            } else {
-                alert("Erro ao cadastrar empréstimo: " + data.message);
-            }
-        } catch (error) {
-            console.error("❌ Erro ao cadastrar empréstimo:", error);
-            alert("Erro ao conectar com o servidor!");
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", carregarClientes);
+// 🔄 Carregar clientes ao iniciar a página
+document.addEventListener("DOMContentLoaded", carregarClientes);
 </script>
+
+<style>
+    /* 🔧 Ajustes no estilo */
+    .logout-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px;
+        width: 100%;
+        text-align: left;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .logout-btn:hover {
+        background: #a71d2a;
+    }
+
+    .menu ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .menu ul li {
+        margin: 10px 0;
+    }
+
+    .menu ul li button {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: white;
+        font-size: 16px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .menu ul li button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .menu ul li button i {
+        font-size: 18px;
+    }
+</style>
 
 </body>
 </html>
