@@ -32,40 +32,6 @@
     </div>
 </div>
 
-<script>
-    // 🔒 Verifica se o usuário está autenticado
-    document.addEventListener("DOMContentLoaded", function () {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("Sessão expirada! Faça login novamente.");
-            window.location.href = "index.html"; // Redireciona para login
-        }
-    });
-
-    // ⏳ Expiração da Sessão por Inatividade
-    let tempoInatividade;
-    function resetarTempo() {
-        clearTimeout(tempoInatividade);
-        tempoInatividade = setTimeout(() => {
-            alert("Sessão expirada por inatividade! Faça login novamente.");
-            localStorage.removeItem("token");
-            window.location.href = "index.html"; // Redireciona para login
-        }, 5 * 60 * 1000); // 5 minutos (300000 ms)
-    }
-
-    document.addEventListener("mousemove", resetarTempo);
-    document.addEventListener("keydown", resetarTempo);
-    document.addEventListener("click", resetarTempo);
-    resetarTempo(); // Inicia o temporizador ao carregar a página
-
-    // 🔴 Logout (Limpa Token e Redireciona)
-    function logout() {
-        localStorage.removeItem("token");
-        window.location.href = "index.html"; // Redireciona para a tela de login
-    }
-</script>
-
 <style>
     body {
         display: flex;
