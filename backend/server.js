@@ -1,9 +1,9 @@
-// ðŸ”’ FunÃ§Ã£o para verificar autenticaÃ§Ã£o e proteger pÃ¡ginas
+// ?? Função para verificar autenticação e proteger páginas
 function verificarAutenticacao() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        window.location.href = "index.html"; // Redireciona para login se nÃ£o estiver autenticado
+        window.location.href = "index.html"; // Redireciona para login se não estiver autenticado
         return;
     }
 
@@ -14,7 +14,7 @@ function verificarAutenticacao() {
     .then(response => {
         if (!response.ok) {
             localStorage.removeItem("token");
-            window.location.href = "index.html"; // Redireciona para login se o token for invÃ¡lido
+            window.location.href = "index.html"; // Redireciona se o token for inválido
         }
     })
     .catch(() => {
@@ -23,34 +23,37 @@ function verificarAutenticacao() {
     });
 }
 
-// â³ FunÃ§Ã£o para expirar a sessÃ£o apÃ³s 5 minutos sem interaÃ§Ã£o
+// ? Função para expirar a sessão após 5 minutos sem interação
 let tempoInatividade;
 
 function resetarTempo() {
     clearTimeout(tempoInatividade);
     tempoInatividade = setTimeout(() => {
-        alert("SessÃ£o expirada! FaÃ§a login novamente.");
+        alert("Sessão expirada! Faça login novamente.");
         localStorage.removeItem("token");
         window.location.href = "index.html"; // Redireciona para login
     }, 5 * 60 * 1000); // 5 minutos (300000 ms)
 }
 
-// Reseta o tempo sempre que houver interaÃ§Ã£o
+// Reseta o tempo sempre que houver interação
 document.addEventListener("mousemove", resetarTempo);
 document.addEventListener("keydown", resetarTempo);
 document.addEventListener("click", resetarTempo);
 
-resetarTempo(); // Inicia o temporizador quando a pÃ¡gina carrega
+resetarTempo(); // Inicia o temporizador quando a página carrega
 
-// ðŸ”„ Chama a funÃ§Ã£o de autenticaÃ§Ã£o ao carregar a pÃ¡gina
+// ?? Chama a função de autenticação ao carregar a página
 document.addEventListener("DOMContentLoaded", verificarAutenticacao);
 
-// ðŸ“¥ FunÃ§Ã£o para carregar clientes na lista suspensa
+// ?? Função para carregar clientes na lista suspensa
 async function carregarClientes() {
     try {
         const response = await fetch("https://cashnow-app.onrender.com/listar-clientes", {
             headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
         });
+
+        if (!response.ok) throw new Error("Erro ao buscar clientes");
+
         const clientes = await response.json();
 
         const select = document.getElementById("idcliente");
@@ -67,7 +70,7 @@ async function carregarClientes() {
     }
 }
 
-// ðŸ“Š FunÃ§Ã£o para carregar pagamentos do cliente selecionado
+// ?? Função para carregar pagamentos do cliente selecionado
 async function carregarPagamentos() {
     const idcliente = document.getElementById("idcliente").value;
 
@@ -80,6 +83,9 @@ async function carregarPagamentos() {
         const response = await fetch(`https://cashnow-app.onrender.com/listar-pagamentos/${idcliente}`, {
             headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
         });
+
+        if (!response.ok) throw new Error("Erro ao buscar pagamentos");
+
         const pagamentos = await response.json();
 
         const tabela = document.getElementById("tabelaPagamentos");
@@ -90,7 +96,7 @@ async function carregarPagamentos() {
                         <th>Data</th>
                         <th>Valor</th>
                         <th>Status</th>
-                        <th>AÃ§Ã£o</th>
+                        <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +124,7 @@ async function carregarPagamentos() {
     }
 }
 
-// âœ… FunÃ§Ã£o para confirmar pagamento
+// ? Função para confirmar pagamento
 async function confirmarPagamento(idpagamento) {
     if (!confirm("Deseja confirmar este pagamento?")) return;
 
@@ -128,10 +134,12 @@ async function confirmarPagamento(idpagamento) {
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` }
         });
 
+        if (!response.ok) throw new Error("Erro ao confirmar pagamento");
+
         const data = await response.json();
         if (data.success) {
             alert("Pagamento confirmado com sucesso!");
-            carregarPagamentos(); // Atualiza a tabela apÃ³s confirmaÃ§Ã£o
+            carregarPagamentos(); // Atualiza a tabela após confirmação
         } else {
             alert("Erro ao confirmar pagamento: " + data.message);
         }
@@ -140,8 +148,8 @@ async function confirmarPagamento(idpagamento) {
     }
 }
 
-// ðŸ“Œ Adiciona evento ao selecionar um cliente
+// ?? Adiciona evento ao selecionar um cliente
 document.getElementById("idcliente")?.addEventListener("change", carregarPagamentos);
 
-// ðŸ”„ Carregar clientes ao iniciar a pÃ¡gina
+// ?? Carregar clientes ao iniciar a página
 document.addEventListener("DOMContentLoaded", carregarClientes);
