@@ -129,7 +129,23 @@
 </div>
 
 <!-- Scripts -->
+
+
+
 <script>
+
+// 🔒 Verifica se o usuário está autenticado ao carregar a página
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Sessão expirada! Faça login novamente.");
+        window.location.href = "index.html"; // Redireciona para a tela de login
+    }
+});
+
+
+
     function carregarMenu() {
         fetch("/menu.html") // Use caminho absoluto para garantir que o arquivo seja encontrado
             .then(response => {

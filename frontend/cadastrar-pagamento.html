@@ -49,7 +49,23 @@
 </div>
 
 <!-- Adicione este script antes do fechamento do body -->
+
+
 <script>
+
+// ?? Verifica se o usuário está autenticado ao carregar a página
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Sessão expirada! Faça login novamente.");
+        window.location.href = "index.html"; // Redireciona para a tela de login
+    }
+});
+
+
+
+
     document.addEventListener("DOMContentLoaded", () => {
         carregarClientes(); // Carregar clientes ao abrir a pÃ¡gina
     });
