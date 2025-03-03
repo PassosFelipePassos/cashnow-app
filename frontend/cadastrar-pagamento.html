@@ -51,30 +51,6 @@
 <!-- Adicione este script antes do fechamento do body -->
 
 
-<script>
-
-// ?? Verifica se o usu·rio est· autenticado ao carregar a p·gina
-document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        alert("Sess„o expirada! FaÁa login novamente.");
-        window.location.href = "index.html"; // Redireciona para a tela de login
-    }
-});
-
-
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-        carregarClientes(); // Carregar clientes ao abrir a p√°gina
-    });
-
-    function logout() {
-        localStorage.removeItem("token");
-        window.location.href = "index.html";
-    }
-</script>
 
 </body>
 </html>
