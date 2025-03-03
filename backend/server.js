@@ -23,24 +23,6 @@ function verificarAutenticacao() {
     });
 }
 
-// ? Função para expirar a sessão após 5 minutos sem interação
-let tempoInatividade;
-
-function resetarTempo() {
-    clearTimeout(tempoInatividade);
-    tempoInatividade = setTimeout(() => {
-        alert("Sessão expirada! Faça login novamente.");
-        localStorage.removeItem("token");
-        window.location.href = "index.html"; // Redireciona para login
-    }, 5 * 60 * 1000); // 5 minutos (300000 ms)
-}
-
-// Reseta o tempo sempre que houver interação
-document.addEventListener("mousemove", resetarTempo);
-document.addEventListener("keydown", resetarTempo);
-document.addEventListener("click", resetarTempo);
-
-resetarTempo(); // Inicia o temporizador quando a página carrega
 
 // ?? Chama a função de autenticação ao carregar a página
 document.addEventListener("DOMContentLoaded", verificarAutenticacao);
