@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dashboard - CashNow</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -16,25 +16,55 @@
         <p>Escolha uma opção abaixo:</p>
         
         <div class="button-group">
-            <button onclick="location.href='cadastrar-cliente.html'"><i class="fas fa-user-plus"></i> Cadastrar Novo Cliente</button>
-            <button onclick="location.href='novo-emprestimo.html'"><i class="fas fa-hand-holding-usd"></i> Novo Empréstimo</button>
-            <!-- <button onclick="location.href='acompanhamento-emprestimos.html'"><i class="fas fa-chart-line"></i> Acompanhamento de Empréstimos</button> -->
-			<li><a href="cadastrar-pagamento.html">Cadastrar Pagamento</a></li>
+            <button onclick="location.href='cadastrar-cliente.html'">
+                <i class="fas fa-user-plus"></i> Cadastrar Novo Cliente
+            </button>
+            <button onclick="location.href='novo-emprestimo.html'">
+                <i class="fas fa-hand-holding-usd"></i> Novo Empréstimo
+            </button>
+            <button onclick="location.href='cadastrar-pagamento.html'">
+                <i class="fas fa-money-bill-wave"></i> Cadastrar Pagamento
+            </button>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("token");
+    // 🔒 Verifica se o usuário está autenticado
+    document.addEventListener("DOMContentLoaded", function () {
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        alert("Sessão expirada! Faça login novamente.");
-        window.location.href = "index.html"; // Redireciona para login
+        if (!token) {
+            alert("Sessão expirada! Faça login novamente.");
+            window.location.href = "index.html"; // Redireciona para login
+        }
+    });
+
+    // ⏳ Expiração da Sessão por Inatividade
+    let tempoInatividade;
+    function resetarTempo() {
+        clearTimeout(tempoInatividade);
+        tempoInatividade = setTimeout(() => {
+            alert("Sessão expirada por inatividade! Faça login novamente.");
+            localStorage.removeItem("token");
+            window.location.href = "index.html"; // Redireciona para login
+        }, 5 * 60 * 1000); // 5 minutos (300000 ms)
     }
-});
-</script>
 
+    document.addEventListener("mousemove", resetarTempo);
+    document.addEventListener("keydown", resetarTempo);
+    document.addEventListener("click", resetarTempo);
+    resetarTempo(); // Inicia o temporizador ao carregar a página
+
+    // 🔴 Logout (Limpa Token e Redireciona)
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "index.html"; // Redireciona para a tela de login
+    }
+</script>
 
 <style>
     body {
@@ -108,7 +138,16 @@ document.addEventListener("DOMContentLoaded", function () {
         background: #0056b3;
     }
 
-    /* Responsividade */
+    /* 🔴 Botão de Logout */
+    .logout-btn {
+        background: #dc3545;
+    }
+
+    .logout-btn:hover {
+        background: #a71d2a;
+    }
+
+    /* 📱 Responsividade */
     @media (max-width: 480px) {
         .dashboard-box {
             padding: 20px;
